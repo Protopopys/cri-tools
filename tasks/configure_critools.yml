@@ -1,0 +1,9 @@
+---
+# Создаем конфигурационный файл для crictl
+- name: Configuring | Create crictl config file
+  template:
+    src: crictl.yaml.j2
+    dest: /etc/crictl.yaml
+    owner: root
+    group: root
+    mode: "0644"

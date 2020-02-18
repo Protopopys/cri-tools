@@ -1,0 +1,12 @@
+---
+# Импортируем задание установки бинарников cri-tools 
+- name: CRITOOLS | Importing an installation task
+  import_tasks: "install_critools.yml"
+  tags:
+    - install
+
+# Импортируем задание конфигурирования
+- name: CRITOOLS | Importing CRITOOLS configuration task
+  import_tasks: "configure_critools.yml"
+  tags:
+    - configure

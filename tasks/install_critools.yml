@@ -1,0 +1,138 @@
+---
+# Проверяем наличие требуемых бинарников
+- name: CRITOOLS | Checking that the cri-tools binaries exists
+  stat:
+    path: "{{ critools_bin_path }}/{{ item }}"
+    checksum_algorithm: "{{ critools[critools_version][item].checksum_algorithm }}"
+  register: critools_bin
+  loop: "{{ critools_bin_name }}"
+
+# Создаем переменную install_critools=true
+# Если:
+## Бинарные файлы отсутствуют или
+## Контрольная сумма бинарных файлов не соответствует требуемой
+- name: CRITOOLS | Set 'install_critools' to true
+  set_fact:
+    install_critools: true
+  loop: "{{ critools_bin.results }}"
+  when: item.stat.checksum|default() != critools[critools_version][item.item].checksum
+
+- name: CRITOOLS |(when install_critools == TRUE)
+  block:
+    # Создаем папки на удаленной машине
+    - name: CRITOOLS | Creating folders
+      file:
+        path: "{{ distribution_path }}"
+        state: directory
+        owner: root
+        group: root
+        mode: u+rwx
+
+    # Проверяем наличие архива на удаленной машине
+    - name: CRITOOLS | Check that the critools archive exists on the destination host
+      stat:
+        path: "{{ distribution_path }}/{{ critools[critools_version][item].source_url | basename }}"
+        checksum_algorithm: "{{ critools[critools_version].checksum_algorithm }}"
+      register: critools_archive
+      loop: "{{ critools_bin_name }}"
+  when: install_critools|default(false)
+
+# Блок заданий
+# исполняется если:
+## Использвание downloader сервера включено - use_downloader=true и (Если файла нет на удаленном сервере или Контрольная сумма файла не совпадает с указанной в переменной - critools[critools_version].checksum
+- name: CRITOOLS |(when use_downloader == TRUE)
+  block:
+    # Создаем папку на downloader сервере (в данную папку будет осуществляться скачивание архива из сети интернет)
+    - name: CRITOOLS | Creating default folder for components
+      file:
+        path: "{{ downloader_source_folder }}"
+        state: directory
+        mode: u+rwx
+      run_once: true
+      delegate_to: "{{ downloader }}"
+
+    # Проверяем наличие файла на downloader сервере
+    - name: CRITOOLS | Check that the archives exists on the {{ downloader }}
+      stat:
+        path: "{{ downloader_source_folder }}/{{ critools[critools_version][item].source_url | basename }}"
+        checksum_algorithm: "{{ critools[critools_version][item].checksum_algorithm }}"
+      register: downloader_distr
+      run_once: true
+      loop: "{{ critools_bin_name }}"
+      delegate_to: "{{ downloader }}"
+
+    # Выкачиваем архив напрямую из сети интернет
+    # Если:
+    ## Контрольная сумма файла на downloader не совпадает с указанной в переменной - critools[critools_version][item].archive_checksum)
+    - name: CRITOOLS | Download archives to {{ downloader }}
+      get_url:
+        url: "{{ critools[critools_version][item.0.item].source_url }}"
+        dest: "{{ downloader_source_folder }}"
+        checksum: "{{ critools[critools_version][item.0.item].checksum_algorithm }}:{{ critools[critools_version][item.0.item].archive_checksum }}"
+      run_once: true
+      delegate_to: "{{ downloader }}"
+      loop: "{{ critools_archive.results|zip(downloader_distr.results)|list }}"
+      when:
+        - item.0.stat.checksum|default() != critools[critools_version][item.0.item].archive_checksum
+        - item.1.stat.checksum|default() != critools[critools_version][item.1.item].archive_checksum
+
+    # Выполняем синхронизацию файла с удаленной машиной
+    # Если:
+    ## downloader сервером является другая удаленная машина (не та на которой осуществляется запуск playbook - не localhost)
+    - name: CRITOOLS | Copy from {{ downloader }} to remote host
+      synchronize:
+        checksum: true
+        src: "{{ downloader_source_folder }}/{{ critools[critools_version][item.item].source_url | basename }}"
+        dest: "{{ distribution_path }}"
+      delegate_to: "{{ downloader }}"
+      loop: "{{ critools_archive.results }}"
+      when:
+        - downloader != "localhost"
+        - item.stat.checksum|default() != critools[critools_version][item.item].archive_checksum
+
+    # Выполняем синхронизацию файла с удаленной машиной
+    # Если:
+    ## downloader сервером является localhost (машина на которой осуществляется запуск playbook)
+    ## Контрольная сумма файла на удаленном сервере не совпадает с указанной в переменной - critools[critools_version].checksum)
+    - name: CRITOOLS | Copy from localhost to remote host
+      copy:
+        src: "{{ downloader_source_folder }}/{{ critools[critools_version][item.item].source_url | basename }}"
+        dest: "{{ distribution_path }}"
+        owner: root
+        group: root
+        mode: u+rwx
+      loop: "{{ critools_archive.results }}"
+      when:
+        - downloader == "localhost"
+        - item.stat.checksum|default() != critools[critools_version][item.item].archive_checksum
+  when:
+    - install_critools|default(false)
+    - use_downloader
+
+# Выкачиваем архив напрямую из сети интернет
+# Если:
+## Контрольная сумма файла на downloader не совпадает с указанной в переменной - critools[critools_version].item.checksum)
+- name: CRITOOLS | Download archives
+  get_url:
+    url: "{{ critools[critools_version][item.item].source_url }}"
+    dest: "{{ distribution_path }}"
+    checksum: "{{ critools[critools_version][item.item].checksum_algorithm }}:{{ critools[critools_version][item.item].archive_checksum }}"
+    owner: root
+    group: root
+  loop: "{{ critools_archive.results }}"
+  when:
+    - not use_downloader
+    - item.stat.checksum|default() != critools[critools_version][item.item].archive_checksum
+
+# Распаковываем архив на удаленном сервере
+# Если:
+## Переменная install_etcd=true
+- name: CRITOOLS | Extract etcd archive into {{ bin_path }}
+  unarchive:
+    src: "{{ etcd_destination_path }}/{{ etcd[etcd_version][item.item].source_url | basename }}"
+    dest: "{{ bin_path }}"
+    owner: root
+    group: root
+    remote_src: true
+    extra_opts: "{{ etcd[etcd_version].extra_opts }}"
+  when: install_etcd|default(false)

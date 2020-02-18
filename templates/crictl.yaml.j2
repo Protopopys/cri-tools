@@ -1,0 +1,13 @@
+---
+{% if container_manager == 'containerd' %}
+runtime-endpoint: unix:///var/run/containerd/containerd.sock
+image-endpoint: unix:///run/containerd/containerd.sock
+{% elif container_manager == 'crio' %}
+runtime-endpoint: unix:///var/run/crio/crio.sock
+image-endpoint: unix:///var/run/crio/crio.sock
+{% elif container_manager == 'docker' %}
+runtime-endpoint: unix:///var/run/dockershim.sock
+image-endpoint: unix:///var/run/dockershim.sock
+{% endif %}
+timeout: 10
+debug: true
