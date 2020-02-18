@@ -126,13 +126,14 @@
 
 # Распаковываем архив на удаленном сервере
 # Если:
-## Переменная install_etcd=true
-- name: CRITOOLS | Extract etcd archive into {{ critools_bin_path }}
+## Переменная install_critools=true
+- name: CRITOOLS | Extract cri-tools archives into {{ critools_bin_path }}
   unarchive:
-    src: "{{ etcd_destination_path }}/{{ etcd[etcd_version][item.item].source_url | basename }}"
+    src: "{{ distribution_path }}/{{ critools[critools_version][item.item].source_url | basename }}"
     dest: "{{ critools_bin_path }}"
     owner: root
     group: root
     remote_src: true
-    extra_opts: "{{ etcd[etcd_version].extra_opts }}"
-  when: install_etcd|default(false)
+    extra_opts: "{{ critools[critools_version][item.item].extra_opts }}"
+  loop: "{{ critools_bin.results }}"
+#  when: item.stat.checksum|default() != critools[critools_version][item.item].checksum
