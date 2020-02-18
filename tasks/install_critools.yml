@@ -32,7 +32,7 @@
     - name: CRITOOLS | Check that the critools archive exists on the destination host
       stat:
         path: "{{ distribution_path }}/{{ critools[critools_version][item].source_url | basename }}"
-        checksum_algorithm: "{{ critools[critools_version].checksum_algorithm }}"
+        checksum_algorithm: "{{ critools[critools_version][item].checksum_algorithm }}"
       register: critools_archive
       loop: "{{ critools_bin_name }}"
   when: install_critools|default(false)
@@ -127,10 +127,10 @@
 # Распаковываем архив на удаленном сервере
 # Если:
 ## Переменная install_etcd=true
-- name: CRITOOLS | Extract etcd archive into {{ bin_path }}
+- name: CRITOOLS | Extract etcd archive into {{ critools_bin_path }}
   unarchive:
     src: "{{ etcd_destination_path }}/{{ etcd[etcd_version][item.item].source_url | basename }}"
-    dest: "{{ bin_path }}"
+    dest: "{{ critools_bin_path }}"
     owner: root
     group: root
     remote_src: true

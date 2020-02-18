@@ -10,7 +10,7 @@ distribution_path: "/opt/DISTR"
 # Устаноавливаемая версия
 critools_version: v1.17.0
 # Root директория для компонентов
-bin_path: /usr/local/bin
+critools_bin_path: /usr/local/bin
 
 container_manager: containerd
 
@@ -24,9 +24,9 @@ critools:
       source_url: https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.17.0/crictl-v1.17.0-linux-amd64.tar.gz
       checksum_algorithm: "sha256"
       archive_checksum: 7b72073797f638f099ed19550d52e9b9067672523fc51b746e65d7aa0bafa414
-      checksum:
+      checksum: 18ffaab9b59bffb7ad37c3a5e6209b283907a397f9d178ba576e71892b3f5c8f
     critest:
       source_url: https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.17.0/critest-v1.17.0-linux-amd64.tar.gz
       checksum_algorithm: "sha256"
       archive_checksum: 17088d99f70f3e03d8215de3594cbec367749b0a187f147cc3b2b975e497b433
-      checksum:
+      checksum: 113f87f255c3d599768ac1c924bfad71ec3d210586a639f4ffdd06deb1c92c97
