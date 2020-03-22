@@ -52,7 +52,7 @@
       delegate_to: localhost
 
     # Проверяем наличие файла на downloader сервере
-    - name: CRITOOLS | Check that the archives exists on the {{ downloader }}
+    - name: CRITOOLS | Check that the archives exists on the localhost
       stat:
         path: "{{ downloader_source_folder }}/{{ critools[critools_version][item].source_url | basename }}"
         checksum_algorithm: "{{ critools[critools_version][item].checksum_algorithm }}"
@@ -64,7 +64,7 @@
     # Выкачиваем архив напрямую из сети интернет
     # Если:
     ## Контрольная сумма файла на downloader не совпадает с указанной в переменной - critools[critools_version][item].archive_checksum)
-    - name: CRITOOLS | Download archives to {{ downloader }}
+    - name: CRITOOLS | Download archives to localhost
       get_url:
         url: "{{ critools[critools_version][item.0.item].source_url }}"
         dest: "{{ downloader_source_folder }}"
@@ -118,6 +118,5 @@
     owner: root
     group: root
     remote_src: true
-    extra_opts: "{{ critools[critools_version][item.item].extra_opts }}"
   loop: "{{ critools_bin.results }}"
-#  when: item.stat.checksum|default() != critools[critools_version][item.item].checksum
+  when: item.stat.checksum|default() != critools[critools_version][item.item].checksum
