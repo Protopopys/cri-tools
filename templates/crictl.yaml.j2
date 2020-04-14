@@ -1,6 +1,6 @@
 ---
 {% if container_manager == 'containerd' %}
-runtime-endpoint: unix:///var/run/containerd/containerd.sock
+runtime-endpoint: unix:///run/containerd/containerd.sock
 image-endpoint: unix:///run/containerd/containerd.sock
 {% elif container_manager == 'crio' %}
 runtime-endpoint: unix:///var/run/crio/crio.sock
