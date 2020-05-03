@@ -6,7 +6,7 @@ downloader_source_folder: ~/DISTR
 distribution_path: "/opt/DISTR"
 
 # Устаноавливаемая версия
-critools_version: v1.17.0
+critools_version: v1.18.0
 # Root директория для компонентов
 critools_bin_path: /usr/local/bin
 
@@ -32,3 +32,18 @@ critools:
       checksum_algorithm: "sha256"
       # Контрольная сумма бинарного файла
       checksum: 113f87f255c3d599768ac1c924bfad71ec3d210586a639f4ffdd06deb1c92c97
+  v1.18.0:
+    crictl:
+      source_url: https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.18.0/crictl-v1.18.0-linux-amd64.tar.gz
+      # Контрольная сумма скачаемого архива
+      archive_checksum: 876dd2b3d0d1c2590371f940fb1bf1fbd5f15aebfbe456703ee465d959700f4a
+      checksum_algorithm: "sha256"
+      # Контрольная сумма бинарного файла
+      checksum: 92916455f50ad1a747ecf87f8f478e12a259a0a3258ae84379115069ea9d6353
+    critest:
+      source_url: https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.18.0/critest-v1.18.0-linux-amd64.tar.gz
+      # Контрольная сумма скачаемого архива
+      archive_checksum: 23968677bdf5d4055e5118c85449b19b046ee1d8822cae5859b7a4a80c2f1955
+      checksum_algorithm: "sha256"
+      # Контрольная сумма бинарного файла
+      checksum: 17ba410659a3efa3498a19959c5f4a4b397a1d3239de0fcb98ffbce8b3539590
