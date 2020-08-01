@@ -2,6 +2,6 @@
 - name: Converge
   hosts: all
   tasks:
-    - name: "Include ansible-critools"
+    - name: "Include cri-tools"
       include_role:
-        name: "ansible-critools"
+        name: "cri-tools"

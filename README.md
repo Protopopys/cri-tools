@@ -1,4 +1,4 @@
-![Molecule Test](https://github.com/Protopopys/ansible-critools/workflows/Molecule%20Test/badge.svg)
+![Molecule Test](https://github.com/Protopopys/cri-tools/workflows/Molecule%20Test/badge.svg)
 
-# ansible-critools
+# cri-tools
 Ansible role for installing CRI-TOOLS
